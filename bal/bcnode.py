@@ -12,14 +12,15 @@ from mininet.log import debug
 
 import os
 
-class BCNode( CPULimitedHost):
+
+class BCNode(CPULimitedHost):
     """A BCNode is a Node that is running (or has execed?) an
        block[chain] application."""
 
-    def __init__( self, name, inNamespace=True,
-                  server='', sargs='', sdir='/tmp/bcn',
-                  client='', cargs='{command}', cdir=None,
-                  ip="127.0.0.1", port='', socket='6000', **params ):
+    def __init__(self, name, inNamespace=True,
+                 server='', sargs='', sdir='/tmp/bcn',
+                 client='', cargs='{command}', cdir=None,
+                 ip="127.0.0.1", port='', socket='6000', **params):
         # Server params
         self.server = server
         self.sargs = sargs
@@ -31,22 +32,22 @@ class BCNode( CPULimitedHost):
 
         self.ip = ip
         self.port = port
-        self.socket= socket
-        CPULimitedHost.__init__( self, name, inNamespace=inNamespace,
-                       ip=ip, **params  )
+        self.socket = socket
+        CPULimitedHost.__init__(self, name, inNamespace=inNamespace,
+                                ip=ip, **params)
 
-    def start( self, sim_path ):
+    def start(self, sim_path):
         """Start <bcnode> <args> on node.
            Log to /tmp/bc_<name>.log"""
         if self.server:
-            pathCheck( self.server )
-            cout = self.sdir  + '/bc_' + self.name + '.log'
+            pathCheck(self.server)
+            cout = self.sdir + '/bc_' + self.name + '.log'
             if self.sdir is not None:
                 try:
                     os.stat(self.sdir)
-                except:
+                except BaseException:
                     os.mkdir(self.sdir)
-                self.cmd( 'cd ' + self.sdir )
+                self.cmd('cd ' + self.sdir)
             cmd = self.server
             if self.sargs:
                 cmd += " " + self.sargs.format(name=self.name,
@@ -55,18 +56,18 @@ class BCNode( CPULimitedHost):
                                                cdir=self.cdir,
                                                sdir=self.sdir,
                                                socket=self.socket,
-                                               simulation_path = sim_path)
-            debug( cmd + ' 1>' + cout + ' 2>' + cout + ' &' )
-            self.cmd( cmd + ' 1>' + cout + ' 2>' + cout + ' &' )
+                                               simulation_path=sim_path)
+            debug(cmd + ' 1>' + cout + ' 2>' + cout + ' &')
+            self.cmd(cmd + ' 1>' + cout + ' 2>' + cout + ' &')
             self.execed = False
 
-    def stop( self, *args, **kwargs ):
+    def stop(self, *args, **kwargs):
         "Stop node."
-        self.cmd( 'kill %' + self.server )
-        self.cmd( 'wait %' + self.server )
-        super( BCNode, self ).stop( *args, **kwargs )
+        self.cmd('kill %' + self.server)
+        self.cmd('wait %' + self.server)
+        super(BCNode, self).stop(*args, **kwargs)
 
-    def isAvailable( self ):
+    def isAvailable(self):
         "Is executables available?"
         cmd = 'which '
         if self.server:
@@ -75,15 +76,15 @@ class BCNode( CPULimitedHost):
             cmd += self.client
         return quietRun(cmd)
 
-
-    def call(self, command, silent= False, data=''):
+    def call(self, command, silent=False, data=''):
         """Call <client> <cargs> on node."""
         if self.cdir is not None:
-            self.cmd( 'cd ' + self.cdir )
+            self.cmd('cd ' + self.cdir)
         cmd = self.client
-        pathCheck( cmd )
+        pathCheck(cmd)
         if data:
-            method = '''POST -H "Content-Type: application/json" -d '{data}' '''.format(data = data)
+            method = '''POST -H "Content-Type: application/json" -d '{data}' '''.format(
+                data=data)
         else:
             method = "GET"
 
@@ -96,45 +97,60 @@ class BCNode( CPULimitedHost):
                                            cdir=self.cdir,
                                            sdir=self.sdir)
         else:
-            cmd += " "  + command
+            cmd += " " + command
         if silent:
-            result = self.cmd( cmd )
+            result = self.cmd(cmd)
         else:
-            result = self.cmdPrint( cmd )
+            result = self.cmdPrint(cmd)
 
         debug("command: %s = %s" % (cmd, result))
         return result
 
+
 class POWNode(BCNode):
     """A POWNode is a BCNode that is running an POWBlockchain."""
 
-    def __init__( self, name, bcclass=None, inNamespace=True,
-                  server='blockchain.py',
-                  sargs='-p {port} -s {socket} -d 2 -k {sdir}/{IP}pow.pem -n {name} -sp {simulation_path}',
-                  sdir='/tmp/bcn',
-                  client='curl',
-                  cargs="-s -X {method} http://{IP}:{port}/{command}",
-                  cdir=None,
-                  ip="127.0.0.1", port='5000', **params ):
+    def __init__(
+            self,
+            name,
+            bcclass=None,
+            inNamespace=True,
+            server='blockchain.py',
+            sargs='-p {port} -s {socket} -d 2 -k {sdir}/{IP}pow.pem -n {name} -sp {simulation_path}',
+            sdir='/tmp/bcn',
+            client='curl',
+            cargs="-s -X {method} http://{IP}:{port}/{command}",
+            cdir=None,
+            ip="127.0.0.1",
+            port='5000',
+            **params):
 
-        BCNode.__init__( self, name, inNamespace=inNamespace,
-                         server=server, sargs=sargs, sdir=sdir,
-                         client=client, cargs=cargs, cdir=cdir,
-                         ip=ip, port=port, **params )
+        BCNode.__init__(self, name, inNamespace=inNamespace,
+                        server=server, sargs=sargs, sdir=sdir,
+                        client=client, cargs=cargs, cdir=cdir,
+                        ip=ip, port=port, **params)
+
 
 class POSNode(BCNode):
     """A POSNode is a BCNode that is running an POSBlockchain."""
 
-    def __init__( self, name, bcclass=None, inNamespace=True,
-                  server='blockchain.py',
-                  sargs='-p {port} -s {socket} -v pos -k {sdir}/{IP}pos.pem -n {name} -sp {simulation_path}',
-                  sdir='/tmp/bcn',
-                  client='curl',
-                  cargs="-s -X {method} http://{IP}:{port}/{command}",
-                  cdir=None,
-                  ip="127.0.0.1", port='5000', socket='6000', **params ):
+    def __init__(
+            self,
+            name,
+            bcclass=None,
+            inNamespace=True,
+            server='blockchain.py',
+            sargs='-p {port} -s {socket} -v pos -k {sdir}/{IP}pos.pem -n {name} -sp {simulation_path}',
+            sdir='/tmp/bcn',
+            client='curl',
+            cargs="-s -X {method} http://{IP}:{port}/{command}",
+            cdir=None,
+            ip="127.0.0.1",
+            port='5000',
+            socket='6000',
+            **params):
 
-        BCNode.__init__( self, name, inNamespace=inNamespace,
-                         server=server, sargs=sargs, sdir=sdir,
-                         client=client, cargs=cargs, cdir=cdir,
-                         ip=ip, port=port, **params )
+        BCNode.__init__(self, name, inNamespace=inNamespace,
+                        server=server, sargs=sargs, sdir=sdir,
+                        client=client, cargs=cargs, cdir=cdir,
+                        ip=ip, port=port, **params)

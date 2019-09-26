@@ -12,10 +12,17 @@ from mininet.log import setLogLevel
 import shutil
 import getopt
 
+
 def simulate(host_type):
     net = None
     try:
-        net = Mininet( topo=None, build=False, host=host_type, ipBase='10.0.0.0/8', xterms=True, waitConnected=True)
+        net = Mininet(
+            topo=None,
+            build=False,
+            host=host_type,
+            ipBase='10.0.0.0/8',
+            xterms=True,
+            waitConnected=True)
 
         h1 = net.addHost('h1', ip='10.0.0.1', defaultRoute=None)
         h2 = net.addHost('h2', ip='10.0.0.2', defaultRoute=None)
@@ -35,7 +42,7 @@ def simulate(host_type):
 
         for node in net.hosts:
             node.start('/tmp/')
-        sleep(2) # Wait for nodes to be started completely.
+        sleep(2)  # Wait for nodes to be started completely.
 
         generators = [h1, h2, h3, h4]
         for node in generators:
@@ -54,9 +61,16 @@ def simulate(host_type):
                 if h.name in generated:
                     continue
                 host_amount = verifier_check_amount(h, verifier)
-                print(h.name + ' has ' + str(host_amount) + ' coin currently, target is: ' + str(a))
+                print(
+                    h.name +
+                    ' has ' +
+                    str(host_amount) +
+                    ' coin currently, target is: ' +
+                    str(a))
                 if (host_amount >= a):
-                    print(h.name + ' has enough coin, stopping generation for it')
+                    print(
+                        h.name +
+                        ' has enough coin, stopping generation for it')
                     h.call('block/generate/loop/stop')
                     generated.append(h.name)
 
@@ -71,7 +85,7 @@ def simulate(host_type):
         send_transaction(h3, h5, 35)
         wait_and_forge_transactions(verifier, 2)
 
-        #8/11/10 Phase1
+        # 8/11/10 Phase1
         open_mininet_cli(net)
         h6 = add_host_helper('h6', '10.0.0.6', s2, net)
         h7 = add_host_helper('h7', '10.0.0.7', s2, net)
@@ -89,13 +103,14 @@ def simulate(host_type):
         send_transaction(h4, h8, 15)
         wait_and_forge_transactions(verifier, 3)
 
-        #8/11/10 between entity
-        raw_input('Input something to send mid-transactions(between entity) in 8/11/10')
+        # 8/11/10 between entity
+        raw_input(
+            'Input something to send mid-transactions(between entity) in 8/11/10')
         send_transaction(h6, h5, 5)
         send_transaction(h7, h5, 30)
         wait_and_forge_transactions(verifier, 2)
 
-        #8/11/10 Phase2
+        # 8/11/10 Phase2
         open_mininet_cli(net)
         h9 = add_host_helper('h9', '10.0.0.9', s1, net)
         h10 = add_host_helper('h10', '10.0.0.10', s1, net)
@@ -107,12 +122,12 @@ def simulate(host_type):
         send_transaction(h5, h10, 90)
         wait_and_forge_transactions(verifier, 2)
 
-        #8/11/10 Phase3
+        # 8/11/10 Phase3
         raw_input('Input something to send transactions in 8/11/10 Phase3: ')
         send_transaction(h10, verifier, 90)
         wait_and_forge_transactions(verifier, 1)
 
-        #15/06/2011
+        # 15/06/2011
         open_mininet_cli(net)
         h11 = add_host_helper('h11', '10.0.0.11', s1, net)
         register_peers(h8, h11)
@@ -121,7 +136,7 @@ def simulate(host_type):
         send_transaction(h8, h11, 15)
         wait_and_forge_transactions(verifier, 1)
 
-        #17/06/2011: Phase1
+        # 17/06/2011: Phase1
         open_mininet_cli(net)
         h12 = add_host_helper('h12', '10.0.0.12', s1, net)
         register_peers(h11, h12)
@@ -129,25 +144,32 @@ def simulate(host_type):
         raw_input('Input something to send transactions in 17/06/2011: Phase1: ')
         target_amount = 12
         transaction_count = 8
-        print("Sending " + str(transaction_count) + " number of transactions from h11 to h12")
+        print("Sending " + str(transaction_count) +
+              " number of transactions from h11 to h12")
         for i in range(1, transaction_count + 1):
-            send_transaction(h11, h12, target_amount/float(transaction_count), True)
+            send_transaction(
+                h11,
+                h12,
+                target_amount /
+                float(transaction_count),
+                True)
             wait_and_forge_transactions(verifier, 1)
             sleep(0.5)
 
-        #17/06/2011: Phase2
+        # 17/06/2011: Phase2
         raw_input('Input something to send transactions in 17/06/2011 Phase2: ')
         send_transaction(h12, verifier, 12)
         wait_and_forge_transactions(verifier, 1)
 
     finally:
-        result=CLI(net)
+        result = CLI(net)
         net.stop()
+
 
 def main():
     host_type = None
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"ht:",["host_type="])
+        opts, args = getopt.getopt(sys.argv[1:], "ht:", ["host_type="])
     except getopt.GetoptError:
         print 'bcmn_simulation -ht <POW/POS>'
         sys.exit(2)
@@ -170,8 +192,9 @@ def main():
     tmp_location = '/tmp/bcn'
     if os.path.exists(tmp_location):
         shutil.rmtree('/tmp/bcn')
-    setLogLevel( 'info' )
+    setLogLevel('info')
     simulate(host_type)
+
 
 if __name__ == '__main__':
     main()

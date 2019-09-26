@@ -3,6 +3,7 @@ import copy
 import json
 from functional import seq
 
+
 class TransactionPool:
     def __init__(self):
         self.transaction_pool = []
@@ -12,7 +13,9 @@ class TransactionPool:
 
     def add_to_transaction_pool(self, tx, unspent_tx_outs):
         if not validate_transaction(tx, unspent_tx_outs):
-            raise Exception('Trying to add invalid tx to pool: ' + json.dumps(tx))
+            raise Exception(
+                'Trying to add invalid tx to pool: ' +
+                json.dumps(tx))
 
         if not self.is_valid_tx_for_pool(tx):
             raise Exception('Trying to add same tx to pool')
@@ -21,7 +24,10 @@ class TransactionPool:
         self.transaction_pool.append(tx.copy())
 
     def has_tx_in(self, tx_in, unspent_tx_outs):
-        found_tx_in = find_unspent_tx_out(tx_in['tx_out_id'], tx_in['tx_out_index'], unspent_tx_outs)
+        found_tx_in = find_unspent_tx_out(
+            tx_in['tx_out_id'],
+            tx_in['tx_out_index'],
+            unspent_tx_outs)
         return bool(found_tx_in)
 
     def update_transaction_pool(self, unspent_tx_outs):
@@ -32,13 +38,16 @@ class TransactionPool:
                     invalid_txs.append(tx)
                     break
         if len(invalid_txs) > 0:
-            print('removing the following transactions from txPool: %s', json.dumps(invalid_txs))
-            self.transaction_pool = [tx for tx in self.transaction_pool if tx not in invalid_txs]
+            print(
+                'removing the following transactions from txPool: %s',
+                json.dumps(invalid_txs))
+            self.transaction_pool = [
+                tx for tx in self.transaction_pool if tx not in invalid_txs]
 
     def get_tx_pool_ins(self):
         return seq(self.transaction_pool)\
-                .map(lambda tx : tx['tx_ins'])\
-                .flatten()
+            .map(lambda tx: tx['tx_ins'])\
+            .flatten()
 
     def is_valid_tx_for_pool(self, tx):
         tx_pool_ins = self.get_tx_pool_ins()

@@ -31,6 +31,7 @@ import complex_random_topology_generator as rtg
 
 flatten = itertools.chain.from_iterable
 
+
 def simulate(host_number, number_of_transactions, root_path):
     timestamp_str = str(int(time()))
     edge_number = 2 * host_number
@@ -38,7 +39,7 @@ def simulate(host_number, number_of_transactions, root_path):
     while len(unique_cores) < 3:
         adj_matrix = rtg.random_connected_graph(host_number, edge_number)
         edge_list = rtg.graph_to_str(adj_matrix)
-        G = nx.parse_edgelist(edge_list, nodetype = int)
+        G = nx.parse_edgelist(edge_list, nodetype=int)
         core_numbers = nx.core_number(G)
         unique_cores = list(set(core_numbers.values()))
 
@@ -46,15 +47,40 @@ def simulate(host_number, number_of_transactions, root_path):
     for core_number in unique_cores:
         print("Simulating with miner in ks:" + str(core_number))
         miner_number = 1
-        miner_names = ['h'+ str(name) for name, core in core_numbers.items() if core == core_number][:miner_number]
-        subsimulation(adj_matrix, host_number, core_number, miner_names, root_path, number_of_transactions, timestamp_str, edge_list)
+        miner_names = ['h' + str(name) for name, core in core_numbers.items()
+                       if core == core_number][:miner_number]
+        subsimulation(
+            adj_matrix,
+            host_number,
+            core_number,
+            miner_names,
+            root_path,
+            number_of_transactions,
+            timestamp_str,
+            edge_list)
 
-def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path, number_of_transactions, timestamp_str, edge_list):
+
+def subsimulation(
+        adj_matrix,
+        host_number,
+        k_shell_miner,
+        miner_names,
+        root_path,
+        number_of_transactions,
+        timestamp_str,
+        edge_list):
     net = None
     try:
         start_time = time()
-        net_params = {'topo': None, 'build': False, 'host': POWNode, 'switch': OVSBridge,
-                        'link': TCLink, 'ipBase': '10.0.0.0/8', 'waitConnected' : True, 'xterms': False}
+        net_params = {
+            'topo': None,
+            'build': False,
+            'host': POWNode,
+            'switch': OVSBridge,
+            'link': TCLink,
+            'ipBase': '10.0.0.0/8',
+            'waitConnected': True,
+            'xterms': False}
         net = rtg.mininet_topo(adj_matrix, net_params)
         net.build()
         net.start()
@@ -62,12 +88,13 @@ def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path
         miners = [host for host in net.hosts if host.name in miner_names]
         verifier = random.choice(miners)
         parametered_path = 'h' + str(host_number) + 'ks' + str(k_shell_miner)
-        ts_dir_path = init_simulation_path(root_path + parametered_path + '/' + timestamp_str + '/')
+        ts_dir_path = init_simulation_path(
+            root_path + parametered_path + '/' + timestamp_str + '/')
 
         for node in net.hosts:
             node.start(ts_dir_path)
 
-        sleep(2) # Wait for nodes to be started completely.
+        sleep(2)  # Wait for nodes to be started completely.
 
         peer_topology = register_peer_topology(net)
 
@@ -75,8 +102,10 @@ def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path
 
         target_amount = 10
         target_number = 3
-        random_generator_number = target_number - len(miners) if target_number > len(miners) else 0
-        random_generator_hosts = random.sample([x for x in net.hosts if x not in miners], random_generator_number)
+        random_generator_number = target_number - \
+            len(miners) if target_number > len(miners) else 0
+        random_generator_hosts = random.sample(
+            [x for x in net.hosts if x not in miners], random_generator_number)
         generators = miners + random_generator_hosts
 
         for node in generators:
@@ -91,9 +120,16 @@ def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path
                 if h.name in generated:
                     continue
                 host_amount = verifier_check_amount(h, verifier)
-                print(h.name + ' has ' + str(host_amount) + ' coins currently, target is: ' + str(target_amount))
+                print(
+                    h.name +
+                    ' has ' +
+                    str(host_amount) +
+                    ' coins currently, target is: ' +
+                    str(target_amount))
                 if (host_amount >= target_amount):
-                    print(h.name + ' has enough coins, stopping generation for it')
+                    print(
+                        h.name +
+                        ' has enough coins, stopping generation for it')
                     h.call('block/generate/loop/stop', True)
                     generated.append(h.name)
 
@@ -103,20 +139,27 @@ def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path
         i = 0
         temp_block_number = 0
         while i < number_of_transactions:
-            receiver = random.sample([x for x in net.hosts if x not in miners], 1)[0]
+            receiver = random.sample(
+                [x for x in net.hosts if x not in miners], 1)[0]
             sender = random.sample(miners, 1)[0]
-            current_block_number = yaml.safe_load(sender.call('chain/length', True))
+            current_block_number = yaml.safe_load(
+                sender.call('chain/length', True))
             while current_block_number <= temp_block_number:
                 sleep(BLOCK_GENERATION_INTERVAL)
-                current_block_number = yaml.safe_load(sender.call('chain/length', True))
+                current_block_number = yaml.safe_load(
+                    sender.call('chain/length', True))
 
             if send_and_log_transaction(sender, receiver, 1, ts_dir_path):
                 i = i + 1
                 sleep(1)
-                temp_block_number = yaml.safe_load(sender.call('chain/length', True))
+                temp_block_number = yaml.safe_load(
+                    sender.call('chain/length', True))
 
         print('Waiting for nodes to receive transactions')
-        while not check_block_txts(ts_dir_path, host_number, number_of_transactions):
+        while not check_block_txts(
+                ts_dir_path,
+                host_number,
+                number_of_transactions):
             sleep(0.5)
 
         elapsed_time = time() - start_time
@@ -124,11 +167,12 @@ def subsimulation(adj_matrix, host_number, k_shell_miner, miner_names, root_path
         dump_chain(verifier, ts_dir_path)
         net.stop()
         move_txs_to_directories(ts_dir_path)
-    except:
+    except BaseException:
         if net:
             open_mininet_cli(net)
             net.stop()
         traceback.print_exc()
+
 
 def register_peer_topology(net):
     print("Registering peers")
@@ -148,18 +192,26 @@ def register_peer_topology(net):
 
     return peers_by_switch
 
+
 def main():
     host_type = None
     parser = ArgumentParser()
-    parser.add_argument('-p', '--path', default='/tmp/', type=str, help='where the logs will be located. default: /tmp/')
+    parser.add_argument(
+        '-p',
+        '--path',
+        default='/tmp/',
+        type=str,
+        help='where the logs will be located. default: /tmp/')
     args = parser.parse_args()
     tmp_location = '/tmp/bcn'
     if os.path.exists(tmp_location):
         shutil.rmtree('/tmp/bcn')
-    setLogLevel( 'info' )
+    setLogLevel('info')
     host_number = int(input("Number of hosts(>10):"))
-    number_of_transactions = int(input("Number of repeated random transactions:"))
+    number_of_transactions = int(
+        input("Number of repeated random transactions:"))
     simulate(host_number, number_of_transactions, args.path)
+
 
 if __name__ == '__main__':
     main()
