@@ -228,7 +228,10 @@ if __name__ == '__main__':
                 p2p_port, initial_difficulty, simulation_path, args.name)
         else:
             blockchain = POWBlockchainSimulation(
-                p2p_port, initial_difficulty, simulation_path, args.name)
+                p2p_port, 
+                initial_difficulty, 
+                simulation_path, 
+                args.name)
     else:
         if args.variant.find('pos') == 0:
             blockchain = POSBlockchain(p2p_port, initial_difficulty)
