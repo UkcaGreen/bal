@@ -50,12 +50,9 @@ class BCNode(CPULimitedHost):
                 self.cmd('cd ' + self.sdir)
             cmd = self.server
             if self.sargs:
-                cmd += " " + self.sargs.format(name=self.name,
-                                               IP=self.IP(),
-                                               port=self.port,
-                                               cdir=self.cdir,
-                                               sdir=self.sdir,
-                                               socket=self.socket,
+                cmd += " " + self.sargs.format(name=self.name, IP=self.IP(),
+                                               port=self.port, cdir=self.cdir,
+                                               sdir=self.sdir, socket=self.socket,
                                                simulation_path=sim_path)
             debug(cmd + ' 1>' + cout + ' 2>' + cout + ' &')
             self.cmd(cmd + ' 1>' + cout + ' 2>' + cout + ' &')
@@ -89,13 +86,11 @@ class BCNode(CPULimitedHost):
             method = "GET"
 
         if self.cargs:
-            cmd += " " + self.cargs.format(command=command,
-                                           method=method,
-                                           name=self.name,
-                                           IP=self.IP(),
-                                           port=self.port,
-                                           cdir=self.cdir,
-                                           sdir=self.sdir)
+            a = self.cargs.format(command=command, method=method, 
+                                  name=self.name, IP=self.IP(), 
+                                  port=self.port, cdir=self.cdir,
+                                  sdir=self.sdir)
+            cmd += " " + 
         else:
             cmd += " " + command
         if silent:
@@ -110,20 +105,10 @@ class BCNode(CPULimitedHost):
 class POWNode(BCNode):
     """A POWNode is a BCNode that is running an POWBlockchain."""
 
-    def __init__(
-            self,
-            name,
-            bcclass=None,
-            inNamespace=True,
-            server='blockchain.py',
+    def __init__(self, name, bcclass=None, inNamespace=True, server='blockchain.py',
             sargs='-p {port} -s {socket} -d 2 -k {sdir}/{IP}pow.pem -n {name} -sp {simulation_path}',
-            sdir='/tmp/bcn',
-            client='curl',
-            cargs="-s -X {method} http://{IP}:{port}/{command}",
-            cdir=None,
-            ip="127.0.0.1",
-            port='5000',
-            **params):
+            sdir='/tmp/bcn', client='curl', cargs="-s -X {method} http://{IP}:{port}/{command}",
+            cdir=None, ip="127.0.0.1", port='5000', **params):
 
         BCNode.__init__(self, name, inNamespace=inNamespace,
                         server=server, sargs=sargs, sdir=sdir,
@@ -134,21 +119,10 @@ class POWNode(BCNode):
 class POSNode(BCNode):
     """A POSNode is a BCNode that is running an POSBlockchain."""
 
-    def __init__(
-            self,
-            name,
-            bcclass=None,
-            inNamespace=True,
-            server='blockchain.py',
+    def __init__(self, name, bcclass=None, inNamespace=True, server='blockchain.py',
             sargs='-p {port} -s {socket} -v pos -k {sdir}/{IP}pos.pem -n {name} -sp {simulation_path}',
-            sdir='/tmp/bcn',
-            client='curl',
-            cargs="-s -X {method} http://{IP}:{port}/{command}",
-            cdir=None,
-            ip="127.0.0.1",
-            port='5000',
-            socket='6000',
-            **params):
+            sdir='/tmp/bcn', client='curl', cargs="-s -X {method} http://{IP}:{port}/{command}",
+            cdir=None, ip="127.0.0.1", port='5000', socket='6000', **params):
 
         BCNode.__init__(self, name, inNamespace=inNamespace,
                         server=server, sargs=sargs, sdir=sdir,
