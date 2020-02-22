@@ -11,23 +11,11 @@ NO_STAKE_HELP_RATE = 10.0
 
 class POSBlockchain(BaseBlockchain):
     def genesis_block(self):
-        return self.raw_block(0,
-                              1465154705,
-                              '',
-                              [self.genesis_transaction()],
-                              self.get_initial_difficulty(),
-                              0,
-                              '0001')
+        return self.raw_block(0, 1465154705, '', [self.genesis_transaction()],
+                              self.get_initial_difficulty(), 0, '0001')
 
-    def raw_block(
-            self,
-            index,
-            timestamp,
-            previous_hash,
-            transactions,
-            difficulty,
-            staker_balance,
-            staker_address):
+    def raw_block(self, index, timestamp, previous_hash, transactions, 
+                  difficulty, staker_balance, staker_address):
         """
         Create a new Block in the Blockchain
         :param previous_hash: Hash of previous Block
@@ -62,10 +50,7 @@ class POSBlockchain(BaseBlockchain):
         staker_address = block['staker_address']
         timestamp = block['timestamp']
 
-        guess = '{}{}{}'.format(
-            previous_hash,
-            staker_address,
-            timestamp).encode()
+        guess = '{}{}{}'.format(previous_hash, staker_address, timestamp).encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         staking_hash_decimal = int(guess_hash, 16)
         difference = balance_over_difficulty - staking_hash_decimal
@@ -77,14 +62,10 @@ class POSBlockchain(BaseBlockchain):
         while (True):
             timestamp = time()
             if previous_time_stamp != timestamp:
-                temp_block = self.raw_block(
-                    index,
-                    timestamp,
-                    previous_hash,
-                    transactions,
-                    difficulty,
-                    self.get_my_account_balance(),
-                    get_public_from_wallet())
+                temp_block = self.raw_block(index, timestamp, 
+                                            previous_hash, transactions, 
+                                            difficulty, self.get_my_account_balance(), 
+                                            get_public_from_wallet())
                 if self.is_block_staking_valid(temp_block):
                     return temp_block
                 previous_time_stamp = timestamp
