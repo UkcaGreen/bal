@@ -80,8 +80,7 @@ class BCNode(CPULimitedHost):
         cmd = self.client
         pathCheck(cmd)
         if data:
-            method = '''POST -H "Content-Type: application/json" -d '{data}' '''.format(
-                data=data)
+            method = '''POST -H "Content-Type: application/json" -d '{data}' '''.format(data=data)
         else:
             method = "GET"
 
