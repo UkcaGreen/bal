@@ -153,14 +153,16 @@ def sign_tx_in(transaction, tx_in_index, private_key, unspent_tx_outs):
     referenced_unspent_tx_out = find_unspent_tx_out(
         tx_in['tx_out_id'], tx_in['tx_out_index'], unspent_tx_outs)
     if not referenced_unspent_tx_out:
-        raise Exception('could not find referenced txOut')
+        exception_message = 'could not find referenced txOut'
+        raise Exception(exception_message)
 
     referenced_address = referenced_unspent_tx_out['address']
     signing_key = SigningKey.from_der(private_key.decode('hex'))
 
     if signing_key.get_verifying_key().to_der().encode('hex') != referenced_address:
-        raise Exception('trying to sign an input with private' + 
-                        ' key that does not match the address that is referenced in txIn')
+        exception_message = ('trying to sign an input with private key that' + 
+                             ' does not match the address that is referenced in txIn')
+        raise Exception(exception_message)
 
     signature = signing_key.sign(tx_to_sign.encode()).encode('hex')
     return signature
