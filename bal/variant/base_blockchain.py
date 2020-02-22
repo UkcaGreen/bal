@@ -28,8 +28,7 @@ class BaseBlockchain(object):
         self.p2p = P2P(self, p2p_port)
         self.initial_difficulty = initial_difficulty
         self.chain = [self.genesis_block()]
-        self.unspent_tx_outs = process_transactions(
-            self.chain[0]['transactions'], [], 0) or []
+        self.unspent_tx_outs = process_transactions(self.chain[0]['transactions'], [], 0) or []
         self.lock = threading.RLock()
 
     @property
@@ -53,18 +52,16 @@ class BaseBlockchain(object):
         return self.unspent_tx_outs
 
     def genesis_transaction(self):
-        return new_coinbase_transaction(
-            '04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a',
-            0)
+        return new_coinbase_transaction('04bfcab8722991ae774db48f934ca79cfb7dd991229153b9f732ba5334aafcd8e7266e47076996b55a14bf9913ee3145ce0cfc1372ada8ada74bd287450313534a', 0)
 
     @abc.abstractmethod
     def find_block(self, index, previous_hash, transactions, difficulty):
         return NotImplemented
 
     def genesis_block(self):
-        return self.raw_block(
-            0, 1465154705, '', [
-                self.genesis_transaction()], self.get_initial_difficulty())
+        return self.raw_block(0, 1465154705, '', 
+                              [self.genesis_transaction()], 
+                              self.get_initial_difficulty())
 
     def raw_block(self, index, timestamp, previous_hash, transactions, proof):
         """
@@ -91,11 +88,9 @@ class BaseBlockchain(object):
             return latest_block['difficulty']
 
     def get_adjusted_difficulty(self, latest_block, a_block_chain):
-        prev_adjustment_block = a_block_chain[-1 *
-                                              DIFFICULTY_ADJUSTMENT_INTERVAL]
+        prev_adjustment_block = a_block_chain[-1 * DIFFICULTY_ADJUSTMENT_INTERVAL]
         time_expected = BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL
-        time_taken = latest_block['timestamp'] - \
-            prev_adjustment_block['timestamp']
+        time_taken = latest_block['timestamp'] - prev_adjustment_block['timestamp']
         if time_taken < time_expected / 2:
             return prev_adjustment_block['difficulty'] + 1
         elif time_taken > time_expected * 2:
@@ -104,8 +99,8 @@ class BaseBlockchain(object):
             return prev_adjustment_block['difficulty']
 
     def is_valid_timestamp(self, block, previous_block):
-        result = (previous_block['timestamp'] - VALID_TIMESTAMP_INTERVAL <
-                  block['timestamp']) and block['timestamp'] - VALID_TIMESTAMP_INTERVAL < time()
+        result = ((previous_block['timestamp'] - VALID_TIMESTAMP_INTERVAL < block['timestamp']) 
+                  and block['timestamp'] - VALID_TIMESTAMP_INTERVAL < time())
         return result
 
     def generate_raw_next_block(self, transactions):
@@ -132,16 +127,13 @@ class BaseBlockchain(object):
         pass
 
     def get_my_unspent_transaction_outputs(self):
-        return find_unspent_tx_outs(
-            get_public_from_wallet(),
-            self.get_unspent_tx_outs())
+        return find_unspent_tx_outs(get_public_from_wallet(), 
+                                    self.get_unspent_tx_outs())
 
     def generate_next_block(self):
-        coinbase_tx = new_coinbase_transaction(
-            get_public_from_wallet(),
-            self.get_latest_block()['index'] + 1)
-        transactions = [coinbase_tx] + \
-            self.transaction_pool.get_transaction_pool()
+        coinbase_tx = new_coinbase_transaction(get_public_from_wallet(), 
+                                               self.get_latest_block()['index'] + 1)
+        transactions = [coinbase_tx] + self.transaction_pool.get_transaction_pool()
         return self.generate_raw_next_block(transactions)
 
     def get_my_account_balance(self):
@@ -151,15 +143,13 @@ class BaseBlockchain(object):
         return get_balance(address, self.get_unspent_tx_outs())
 
     def send_transaction(self, address, amount):
-        tx = create_transaction(
-            address,
-            amount,
-            get_private_from_wallet(),
-            self.get_unspent_tx_outs(),
-            self.transaction_pool.get_transaction_pool())
+        tx = create_transaction(address,
+                                amount,
+                                get_private_from_wallet(),
+                                self.get_unspent_tx_outs(),
+                                self.transaction_pool.get_transaction_pool())
         self.before_send_transaction(tx)
-        self.transaction_pool.add_to_transaction_pool(
-            tx, self.get_unspent_tx_outs())
+        self.transaction_pool.add_to_transaction_pool(tx, self.get_unspent_tx_outs())
         self.p2p.broadcast_transaction_pool()
         self.after_send_transaction(tx)
         return tx
@@ -171,12 +161,12 @@ class BaseBlockchain(object):
         pass
 
     def is_valid_block_structure(self, block):
-        return isinstance(block['index'], numbers.Number) and \
-            isinstance(block['hash'], str) and \
-            isinstance(block['previous_hash'], str) and \
-            isinstance(block['timestamp'], numbers.Number) and \
-            isinstance(block['transactions'], list) and \
-            isinstance(block['difficulty'], numbers.Number)
+        return (isinstance(block['index'], numbers.Number) 
+                and isinstance(block['hash'], str) 
+                and isinstance(block['previous_hash'], str) 
+                and isinstance(block['timestamp'], numbers.Number) 
+                and isinstance(block['transactions'], list) 
+                and isinstance(block['difficulty'], numbers.Number))
 
     def has_valid_hash(self, block):
         block_content = {x: block[x] for x in block if x != 'hash'}
@@ -188,8 +178,7 @@ class BaseBlockchain(object):
     def handle_received_transaction(self, transaction):
         self.before_handle_received_transaction(transaction)
         with self.lock:
-            self.transaction_pool.add_to_transaction_pool(
-                transaction, self.get_unspent_tx_outs())
+            self.transaction_pool.add_to_transaction_pool(transaction, self.get_unspent_tx_outs())
         self.after_handle_received_transaction(transaction)
 
     def before_handle_received_transaction(self, transaction):
@@ -251,17 +240,15 @@ class BaseBlockchain(object):
         response = {
             'chain': self.chain,
             'length': len(self.chain)
-
         }
         return response
 
     def add_block_to_chain(self, new_block):
         if self.is_valid_block(new_block, self.get_latest_block()):
             with self.lock:
-                ret_val = process_transactions(
-                    new_block['transactions'],
-                    self.get_unspent_tx_outs(),
-                    new_block['index'])
+                ret_val = process_transactions(new_block['transactions'],
+                                               self.get_unspent_tx_outs(),
+                                               new_block['index'])
                 if ret_val:
                     self.before_update_chain(new_block)
                     self.chain.append(new_block)
@@ -276,18 +263,17 @@ class BaseBlockchain(object):
             return False
 
     def replace_chain(self, chain):
-        if self.valid_chain(chain) and self.get_accumulated_difficulty(
-                chain) > self.get_accumulated_difficulty(self.chain):
+        if self.valid_chain(chain) and self.get_accumulated_difficulty(chain) > self.get_accumulated_difficulty(self.chain):
             with self.lock:
                 self.chain = chain
                 a_unspent_tx_outs = []
                 for block in chain:
                     self.before_update_chain(block)
-                    a_unspent_tx_outs = process_transactions(
-                        block['transactions'], a_unspent_tx_outs, block['index'])
+                    a_unspent_tx_outs = process_transactions(block['transactions'], 
+                                                             a_unspent_tx_outs, 
+                                                             block['index'])
                     self.unspent_tx_outs = a_unspent_tx_outs
-                    self.transaction_pool.update_transaction_pool(
-                        a_unspent_tx_outs)
+                    self.transaction_pool.update_transaction_pool(a_unspent_tx_outs)
                     self.after_update_chain(block)
                 self.p2p.broadcast_latest()
         else:
@@ -301,10 +287,10 @@ class BaseBlockchain(object):
         pass
 
     def get_accumulated_difficulty(self, a_blockchain):
-        return seq(a_blockchain)\
-            .map(lambda block: block['difficulty'])\
-            .map(lambda difficulty: 2 ** difficulty)\
-            .reduce(lambda a, b: a + b)
+        return (seq(a_blockchain)
+                .map(lambda block: block['difficulty'])
+                .map(lambda difficulty: 2 ** difficulty)
+                .reduce(lambda a, b: a + b))
 
     def save_db(self):
         if self.db is not None:
