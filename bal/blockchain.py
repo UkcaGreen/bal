@@ -136,12 +136,9 @@ def do_new_transaction():
 @app.route('/transactions/has_amount/<int:amount>', methods=['GET'])
 def do_has_amount_for_transaction(amount):
     try:
-        create_transaction(
-            get_public_from_wallet(),
-            amount,
-            get_private_from_wallet(),
-            blockchain.get_unspent_tx_outs(),
-            blockchain.transaction_pool.get_transaction_pool())
+        create_transaction( get_public_from_wallet(), amount, 
+                           get_private_from_wallet(), blockchain.get_unspent_tx_outs(), 
+                           blockchain.transaction_pool.get_transaction_pool())
         return jsonify(True), 200
     except Exception as e:
         traceback.print_exc()
@@ -176,46 +173,23 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument(
-        '-p',
-        '--port',
-        default=5000,
-        type=int,
-        help='port to listen on')
-    parser.add_argument(
-        '-s',
-        '--socket',
-        default=6001,
-        type=int,
-        help='p2p port to listen on')
-    parser.add_argument('-db', '--database', default='', help='db file')
-    parser.add_argument(
-        '-v',
-        '--variant',
-        default='pow',
-        help='variant of blockchain "pow" or "pos"')
-    parser.add_argument(
-        '-d',
-        '--difficulty',
-        default=4,
-        type=int,
-        help='initial difficulty')
-    parser.add_argument(
-        '-k',
-        '--keystore',
-        default='/tmp/private_key.pem',
-        help='where the keystore located. default: private_key.pem')
-    parser.add_argument(
-        '-sp',
-        '--simulationpath',
-        default='',
-        help='specifies if it is a simulation run and where simulation logs will be kept.')
-    parser.add_argument(
-        '-n',
-        '--name',
-        default='bc',
-        help='specifies blockchain node name(mostly for simulations)')
-
+    parser.add_argument('-p', '--port', default=5000, type=int, 
+                        help='port to listen on')
+    parser.add_argument('-s', '--socket', default=6001, type=int, 
+                        help='p2p port to listen on')
+    parser.add_argument('-db', '--database', default='', 
+                        help='db file')
+    parser.add_argument('-v', '--variant', default='pow', 
+                        help='variant of blockchain "pow" or "pos"')
+    parser.add_argument('-d', '--difficulty', default=4, type=int, 
+                        help='initial difficulty')
+    parser.add_argument('-k', '--keystore', default='/tmp/private_key.pem', 
+                        help='where the keystore located. default: private_key.pem')
+    parser.add_argument('-sp', '--simulationpath', default='', 
+                        help='specifies if it is a simulation run and where simulation logs will be kept.')
+    parser.add_argument('-n', '--name', default='bc', 
+                        help='specifies blockchain node name(mostly for simulations)')
+    
     args = parser.parse_args()
     port = args.port
     dbfile = args.database
@@ -224,14 +198,11 @@ if __name__ == '__main__':
     simulation_path = args.simulationpath
     if simulation_path != '':
         if args.variant.find('pos') == 0:
-            blockchain = POSBlockchainSimulation(
-                p2p_port, initial_difficulty, simulation_path, args.name)
+            blockchain = POSBlockchainSimulation(p2p_port, initial_difficulty, 
+                                                 simulation_path, args.name)
         else:
-            blockchain = POWBlockchainSimulation(
-                p2p_port, 
-                initial_difficulty, 
-                simulation_path, 
-                args.name)
+            blockchain = POWBlockchainSimulation(p2p_port, initial_difficulty, 
+                                                 simulation_path, args.name)
     else:
         if args.variant.find('pos') == 0:
             blockchain = POSBlockchain(p2p_port, initial_difficulty)
@@ -242,8 +213,5 @@ if __name__ == '__main__':
         print("DB: " + dbfile)
         blockchain.init_db(dbfile)
     init_wallet(args.keystore)
-    threading.Thread(
-        target=blockchain.p2p.start,
-        args=()
-    ).start()
+    threading.Thread(target=blockchain.p2p.start, args=()).start()
     app.run(host='0.0.0.0', port=port, threaded=True)
