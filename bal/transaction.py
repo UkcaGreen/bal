@@ -40,10 +40,10 @@ def new_transaction(id, tx_ins, tx_outs):
 
 
 def get_transaction_id(transaction):
-    tx_in_content = ''.join(map(
-        lambda tx_in: tx_in['tx_out_id'] + str(tx_in['tx_out_index']), transaction['tx_ins']))
-    tx_out_content = ''.join(map(
-        lambda tx_out: tx_out['address'] + str(tx_out['amount']), transaction['tx_outs']))
+    tx_in_content = ''.join(map(lambda tx_in: tx_in['tx_out_id'] + str(tx_in['tx_out_index']), 
+                                transaction['tx_ins']))
+    tx_out_content = ''.join(map(lambda tx_out: tx_out['address'] + str(tx_out['amount']), 
+                                 transaction['tx_outs']))
     encoded = '{}{}'.format(tx_in_content, tx_out_content).encode()
     return hashlib.sha256(encoded).hexdigest()
 
@@ -62,26 +62,19 @@ def validate_transaction(transaction, a_unspent_tx_outs):
 
     if total_tx_out_values(transaction) != total_tx_in_values(
             transaction, a_unspent_tx_outs):
-        print(
-            'total_tx_out_values !== total_tx_in_values in tx: ' +
-            transaction['id'])
+        print('total_tx_out_values !== total_tx_in_values in tx: ' + transaction['id'])
         return False
 
     return True
 
 
-def validate_block_transactions(
-        a_transactions,
-        a_unspent_tx_outs,
-        block_index):
+def validate_block_transactions(a_transactions, a_unspent_tx_outs, block_index):
     coinbase_tx = a_transactions[0]
     if not validate_coinbase_tx(coinbase_tx, block_index):
         print('invalid coinbase transaction: ' + json.dumps(coinbase_tx))
         return False
 
-    tx_ins = seq(a_transactions)\
-        .map(lambda tx: tx['tx_ins'])\
-        .flatten()
+    tx_ins = seq(a_transactions).map(lambda tx: tx['tx_ins']).flatten()
 
     if has_duplicates(tx_ins):
         print('has duplicates')
@@ -134,11 +127,8 @@ def validate_tx_in(tx_in, transaction, a_unspent_tx_outs):
     signature = tx_in['signature'].decode("hex")
     valid_signature = key.verify(signature, transaction['id'].encode())
     if not valid_signature:
-        print(
-            'invalid txIn signature: %s txId: %s address: %s',
-            tx_in['signature'],
-            transaction['id'],
-            referenced_u_tx_out['address'])
+        print('invalid txIn signature: %s txId: %s address: %s', 
+              tx_in['signature'], transaction['id'], referenced_u_tx_out['address'])
         return False
 
     return True
@@ -153,8 +143,7 @@ def new_coinbase_transaction(address, block_index):
 
 
 def has_duplicates(tx_ins):
-    tx_in_values = list(
-        map(lambda tx_in: tx_in['tx_out_id'] + str(tx_in['tx_out_index']), tx_ins))
+    tx_in_values = list(map(lambda tx_in: tx_in['tx_out_id'] + str(tx_in['tx_out_index']), tx_ins))
     return len(set(tx_in_values)) != len(tx_in_values)
 
 
@@ -170,9 +159,8 @@ def sign_tx_in(transaction, tx_in_index, private_key, unspent_tx_outs):
     signing_key = SigningKey.from_der(private_key.decode('hex'))
 
     if signing_key.get_verifying_key().to_der().encode('hex') != referenced_address:
-        raise Exception(
-            'trying to sign an input with private' +
-            ' key that does not match the address that is referenced in txIn')
+        raise Exception('trying to sign an input with private' + 
+                        ' key that does not match the address that is referenced in txIn')
 
     signature = signing_key.sign(tx_to_sign.encode()).encode('hex')
     return signature
@@ -182,16 +170,12 @@ def update_unspent_tx_outs(a_transactions, a_unspent_tx_outs):
     new_unspent_tx_outs = get_new_unspent_tx_outs(a_transactions)
     consumed_tx_outs = get_consumed_tx_outs(a_transactions)
 
-    resulting_unspent_tx_outs = get_resulting_unspent_tx_outs(
-        a_unspent_tx_outs, consumed_tx_outs)
+    resulting_unspent_tx_outs = get_resulting_unspent_tx_outs(a_unspent_tx_outs, consumed_tx_outs)
     return resulting_unspent_tx_outs + new_unspent_tx_outs
 
 
 def process_transactions(a_transactions, a_unspent_tx_outs, block_index):
-    if not validate_block_transactions(
-            a_transactions,
-            a_unspent_tx_outs,
-            block_index):
+    if not validate_block_transactions(a_transactions, a_unspent_tx_outs, block_index):
         print('invalid block transactions')
         return None
 
@@ -274,59 +258,40 @@ def get_new_unspent_tx_outs(new_transactions):
     result = []
     for transaction in new_transactions:
         tx_outs = transaction['tx_outs']
-        tx_objs = [
-            new_unspent_tx_out(
-                transaction['id'],
-                index,
-                tx_out['address'],
-                tx_out['amount']) for index,
-            tx_out in enumerate(tx_outs)]
+        tx_objs = [new_unspent_tx_out(transaction['id'], index, tx_out['address'], tx_out['amount']) for index, 
+                   tx_out in enumerate(tx_outs)]
         result.extend(tx_objs)
 
     return result
 
 
 def get_consumed_tx_outs(new_transactions):
-    return seq(new_transactions) .map(
-        lambda t: t['tx_ins']) .reduce(
-        lambda a,
-        b: a +
-        b,
-        []) .map(
-            lambda tx_in: new_unspent_tx_out(
-                tx_in['tx_out_id'],
-                tx_in['tx_out_index'],
-                '',
-                0))
+    return (seq(new_transactions)
+            .map(lambda t: t['tx_ins']).reduce(lambda a, b: a +b, [])
+            .map(lambda tx_in: new_unspent_tx_out(tx_in['tx_out_id'], tx_in['tx_out_index'], '', 0)))
 
 
 def get_resulting_unspent_tx_outs(unspent_tx_outs, consumed_tx_outs):
-    return [tx for tx in unspent_tx_outs or [] if not find_unspent_tx_out(
-        tx['tx_out_id'], tx['tx_out_index'], consumed_tx_outs)]
+    return [tx for tx in unspent_tx_outs or [] 
+            if not find_unspent_tx_out(tx['tx_out_id'], tx['tx_out_index'], consumed_tx_outs)]
 
 
 def has_valid_tx_ins(transaction, a_unspent_tx_outs):
-    return seq(
-        transaction['tx_ins']) .map(
-        lambda tx_in: validate_tx_in(
-            tx_in,
-            transaction,
-            a_unspent_tx_outs)) .reduce(
-                lambda a,
-                b: a and b,
-        True)
+    return (seq(transaction['tx_ins'])
+            .map(lambda tx_in: validate_tx_in(tx_in, transaction, a_unspent_tx_outs))
+            .reduce(lambda a, b: a and b, True))
 
 
 def total_tx_in_values(transaction, a_unspent_tx_outs):
-    return seq(transaction['tx_ins'])\
-        .map(lambda tx_in: get_tx_in_amount(tx_in, a_unspent_tx_outs))\
-        .reduce(lambda a, b: (a + b), 0)
+    return (seq(transaction['tx_ins'])
+            .map(lambda tx_in: get_tx_in_amount(tx_in, a_unspent_tx_outs))
+            .reduce(lambda a, b: (a + b), 0))
 
 
 def total_tx_out_values(transaction):
-    return seq(transaction['tx_outs'])\
-        .map(lambda tx_out: tx_out['amount'])\
-        .reduce(lambda a, b: (a + b), 0)
+    return (seq(transaction['tx_outs'])
+            .map(lambda tx_out: tx_out['amount'])
+            .reduce(lambda a, b: (a + b), 0))
 
 
 def find_unspent_tx_out(transaction_id, index, a_unspent_tx_outs):
@@ -337,7 +302,6 @@ def find_unspent_tx_out(transaction_id, index, a_unspent_tx_outs):
 
 
 def get_tx_in_amount(tx_in, a_unspent_tx_outs):
-    return find_unspent_tx_out(
-        tx_in['tx_out_id'],
-        tx_in['tx_out_index'],
-        a_unspent_tx_outs)['amount']
+    return find_unspent_tx_out(tx_in['tx_out_id'], 
+                               tx_in['tx_out_index'], 
+                               a_unspent_tx_outs)['amount']
