@@ -173,22 +173,38 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
+    
+    help_message = 'port to listen on'
     parser.add_argument('-p', '--port', default=5000, type=int, 
-                        help='port to listen on')
+                        help=help_message)
+    
+    help_message = 'p2p port to listen on'
     parser.add_argument('-s', '--socket', default=6001, type=int, 
-                        help='p2p port to listen on')
+                        help=help_message)
+    
+    help_message = 'db file'
     parser.add_argument('-db', '--database', default='', 
-                        help='db file')
+                        help=help_message)
+    
+    help_message = 'variant of blockchain "pow" or "pos"'
     parser.add_argument('-v', '--variant', default='pow', 
-                        help='variant of blockchain "pow" or "pos"')
+                        help=help_message)
+    
+    help_message = 'initial difficulty'
     parser.add_argument('-d', '--difficulty', default=4, type=int, 
-                        help='initial difficulty')
+                        help=help_message)
+    
+    help_message = 'where the keystore located. default: private_key.pem'
     parser.add_argument('-k', '--keystore', default='/tmp/private_key.pem', 
-                        help='where the keystore located. default: private_key.pem')
+                        help=help_message)
+    
+    help_message = 'specifies if it is a simulation run and where simulation logs will be kept.'
     parser.add_argument('-sp', '--simulationpath', default='', 
-                        help='specifies if it is a simulation run and where simulation logs will be kept.')
+                        help=help_message)
+    
+    help_message = 'specifies blockchain node name(mostly for simulations)'
     parser.add_argument('-n', '--name', default='bc', 
-                        help='specifies blockchain node name(mostly for simulations)')
+                        help=help_message)
     
     args = parser.parse_args()
     port = args.port
