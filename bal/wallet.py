@@ -46,9 +46,9 @@ def delete_wallet():
 
 
 def get_balance(address, unspent_tx_outs):
-    return seq(find_unspent_tx_outs(address, unspent_tx_outs))\
-        .map(lambda u_tx_o: u_tx_o['amount'])\
-        .sum()
+    return (seq(find_unspent_tx_outs(address, unspent_tx_outs))
+            .map(lambda u_tx_o: u_tx_o['amount'])
+            .sum())
 
 
 def find_unspent_tx_outs(owner_address, unspent_tx_outs):
@@ -66,9 +66,9 @@ def find_tx_outs_for_amount(amount, my_unspent_tx_outs):
             left_over_amount = current_amount - amount
             return [included_unspent_tx_outs, left_over_amount]
 
-    e_msg = 'Cannot create transaction from the available unspent transaction outputs.' + \
+    exception_message = 'Cannot create transaction from the available unspent transaction outputs.' + \
         ' Required amount:' + str(amount) + '. Available unspentTxOuts:' + json.dumps(my_unspent_tx_outs)
-    raise Exception(e_msg)
+    raise Exception(exception_message)
 
 
 def create_tx_outs(receiver_address, my_address, amount, left_over_amount):
@@ -81,26 +81,22 @@ def create_tx_outs(receiver_address, my_address, amount, left_over_amount):
 
 
 def filter_tx_pool_txs(unspent_tx_outs, transaction_pool):
-    tx_ins = seq(transaction_pool)\
-        .map(lambda tx: tx['tx_ins'])\
-        .flatten()
+    tx_ins = (seq(transaction_pool)
+              .map(lambda tx: tx['tx_ins'])
+              .flatten())
     removable = []
     for unspent_tx_out in unspent_tx_outs or []:
-        tx_in = find_unspent_tx_out(
-            unspent_tx_out['tx_out_id'],
-            unspent_tx_out['tx_out_index'],
-            tx_ins)
+        tx_in = find_unspent_tx_out(unspent_tx_out['tx_out_id'], 
+                                    unspent_tx_out['tx_out_index'],
+                                    tx_ins)
         if tx_in:
             removable.append(unspent_tx_out)
     return [tx for tx in unspent_tx_outs or [] if tx not in removable]
 
 
-def create_transaction(
-        receiver_address,
-        amount,
-        private_key,
-        unspent_tx_outs,
-        tx_pool):
+def create_transaction(receiver_address, amount, 
+                       private_key, unspent_tx_outs, 
+                       tx_pool):
     print('txPool: ', json.dumps(tx_pool))
     decoded = SigningKey.from_der(private_key.decode("hex"))
     my_address = decoded.get_verifying_key().to_der().encode('hex')
@@ -108,28 +104,20 @@ def create_transaction(
 
     my_unspent_tx_outs = filter_tx_pool_txs(my_unspent_tx_outs_a, tx_pool)
 
-    included_unspent_tx_outs, left_over_amount = find_tx_outs_for_amount(
-        amount, my_unspent_tx_outs)
+    included_unspent_tx_outs, left_over_amount = find_tx_outs_for_amount(amount, my_unspent_tx_outs)
 
-    unsigned_tx_ins = [
-        new_tx_in(
-            utx_o['tx_out_id'],
-            utx_o['tx_out_index'],
-            None) for utx_o in included_unspent_tx_outs]
+    unsigned_tx_ins = [new_tx_in(utx_o['tx_out_id'], utx_o['tx_out_index'], None) 
+                       for utx_o in included_unspent_tx_outs]
 
     tx_ins = unsigned_tx_ins
-    tx_outs = create_tx_outs(
-        receiver_address,
-        my_address,
-        amount,
-        left_over_amount)
+    tx_outs = create_tx_outs(receiver_address, my_address,
+                             amount, left_over_amount)
 
     tx = new_transaction(None, tx_ins, tx_outs)
     tx_id = get_transaction_id(tx)
     tx['id'] = tx_id
 
     for index, tx_in in enumerate(tx['tx_ins']):
-        tx_in['signature'] = sign_tx_in(
-            tx, index, private_key, unspent_tx_outs)
+        tx_in['signature'] = sign_tx_in(tx, index, private_key, unspent_tx_outs)
 
     return tx
