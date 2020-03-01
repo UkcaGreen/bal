@@ -82,8 +82,7 @@ def mininet_topo(adj_matrix, net_params):
     net = Mininet(**net_params)
     switches = [None] * host_number
     for i in range(1, host_number + 1):
-        switches[i - 1] = net.addSwitch('s' +
-                                        str(i), failMode='standalone', stp=1)
+        switches[i - 1] = net.addSwitch('s' + str(i), failMode='standalone', stp=1)
 
     for i in range(1, host_number + 1):
         host = net.addHost('h' + str(i), defaultRoute=None)
