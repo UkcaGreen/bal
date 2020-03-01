@@ -9,20 +9,12 @@ flatten = itertools.chain.from_iterable
 
 
 def send_and_log_transaction(from_host, to_host, amount, dir_path):
-    is_tx_creatable = yaml.safe_load(
-        from_host.call(
-            'transactions/has_amount/' +
-            str(amount),
-            silent=True))
+    is_tx_creatable = yaml.safe_load(from_host.call('transactions/has_amount/' + str(amount), silent=True))
     if is_tx_creatable:
         send_transaction(from_host, to_host, amount)
         with open(dir_path + 'activity.txt', 'a+') as file:  # Use file to refer to the file object
-            file.write(
-                from_host.name +
-                ' sends transaction to ' +
-                to_host.name +
-                ' amount: ' +
-                str(amount))
+            file.write(from_host.name + ' sends transaction to ' + to_host.name 
+                       + ' amount: ' + str(amount))
             file.write('\n')
         return True
     else:
@@ -129,8 +121,8 @@ def init_simulation_path(path):
 
 
 def check_block_txts(dir_path, host_number, tx_number):
-    block_txts = [filename for filename in os.listdir(
-        dir_path) if filename.startswith("transaction_block")]
+    block_txts = [filename for filename in os.listdir(dir_path) 
+                  if filename.startswith("transaction_block")]
     if (not block_txts) or len(block_txts) < tx_number * host_number:
         return False
     return True
@@ -142,8 +134,8 @@ def move_txs_to_directories(dir_path):
 
 
 def move_txs_to_directories_helper(dir_path, file_prefix):
-    filenames = [filename for filename in os.listdir(
-        dir_path) if filename.startswith(file_prefix)]
+    filenames = [filename for filename in os.listdir(dir_path)
+                 if filename.startswith(file_prefix)]
     new_path = dir_path + file_prefix + '/'
     init_simulation_path(new_path)
     for fname in filenames:
@@ -167,12 +159,10 @@ def register_peers(from_host, to_host):
 
 
 def wait_and_forge_transactions(verifier, transaction_number):
-    current_transaction_pool = yaml.safe_load(
-        verifier.call('transactions/pool', True))
+    current_transaction_pool = yaml.safe_load(verifier.call('transactions/pool', True))
     while len(current_transaction_pool) < transaction_number:
         sleep(0.5)
-        current_transaction_pool = yaml.safe_load(
-            verifier.call('transactions/pool', True))
+        current_transaction_pool = yaml.safe_load(verifier.call('transactions/pool', True))
     verifier.call('block/generate')
 
 
