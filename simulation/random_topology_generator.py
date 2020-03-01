@@ -77,8 +77,7 @@ def mininet_topo(switch_number, edge_number, host_number, max_bw):
     net = Topo()
     switches = [None] * switch_number
     for i in range(1, switch_number + 1):
-        switches[i - 1] = net.addSwitch('s' +
-                                        str(i), failMode='standalone', stp=1)
+        switches[i - 1] = net.addSwitch('s' + str(i), failMode='standalone', stp=1)
 
     for i in range(1, host_number + 1):
         ran_bw = ran(max_bw) + 1
