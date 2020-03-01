@@ -42,25 +42,17 @@ def simulate(host_number, number_of_transactions, root_path):
         G = nx.connected_watts_strogatz_graph(host_number, k, wiring_p)
         adj_matrix = rtg.nx_graph_to_adj_matrix(G)
         edge_list = rtg.graph_to_str(adj_matrix)
-        subsimulation(
-            adj_matrix,
-            host_number,
-            wiring_p,
-            root_path,
-            number_of_transactions,
-            timestamp_str,
-            edge_list)
+        subsimulation(adj_matrix, host_number,
+                      wiring_p, root_path,
+                      number_of_transactions, timestamp_str,
+                      edge_list)
         wiring_p = wiring_p + 1.0 / repeat
 
 
-def subsimulation(
-        adj_matrix,
-        host_number,
-        wiring_p,
-        root_path,
-        number_of_transactions,
-        timestamp_str,
-        edge_list):
+def subsimulation(adj_matrix, host_number,
+                  wiring_p, root_path,
+                  number_of_transactions, timestamp_str,
+                  edge_list):
     net = None
     try:
         start_time = time()
@@ -81,8 +73,9 @@ def subsimulation(
         miners = random.sample(net.hosts, miner_number)
         verifier = random.choice(miners)
         parametered_path = 'h' + str(host_number) + 'p' + str(wiring_p)
-        ts_dir_path = init_simulation_path(
-            root_path + parametered_path + '/' + timestamp_str + '/')
+        ts_dir_path = init_simulation_path(root_path 
+                                           + parametered_path + '/' 
+                                           + timestamp_str + '/')
 
         for node in net.hosts:
             node.start(ts_dir_path)
@@ -98,8 +91,8 @@ def subsimulation(
         target_number = 3
         random_generator_number = target_number - \
             len(miners) if target_number > len(miners) else 0
-        random_generator_hosts = random.sample(
-            [x for x in net.hosts if x not in miners], random_generator_number)
+        random_generator_hosts = random.sample([x for x in net.hosts if x not in miners], 
+                                               random_generator_number)
         generators = miners + random_generator_hosts
 
         for node in generators:
@@ -121,9 +114,7 @@ def subsimulation(
                     ' coins currently, target is: ' +
                     str(target_amount))
                 if (host_amount >= target_amount):
-                    print(
-                        h.name +
-                        ' has enough coins, stopping generation for it')
+                    print(h.name + ' has enough coins, stopping generation for it')
                     h.call('block/generate/loop/stop', True)
                     generated.append(h.name)
 
@@ -133,27 +124,22 @@ def subsimulation(
         i = 0
         temp_block_number = 0
         while i < number_of_transactions:
-            receiver = random.sample(
-                [x for x in net.hosts if x not in miners], 1)[0]
+            receiver = random.sample([x for x in net.hosts if x not in miners], 1)[0]
             sender = random.sample(miners, 1)[0]
-            current_block_number = yaml.safe_load(
-                sender.call('chain/length', True))
+            current_block_number = yaml.safe_load(sender.call('chain/length', True))
             while current_block_number <= temp_block_number:
                 sleep(BLOCK_GENERATION_INTERVAL)
-                current_block_number = yaml.safe_load(
-                    sender.call('chain/length', True))
+                current_block_number = yaml.safe_load(sender.call('chain/length', True))
 
             if send_and_log_transaction(sender, receiver, 1, ts_dir_path):
                 i = i + 1
                 sleep(1)
-                temp_block_number = yaml.safe_load(
-                    sender.call('chain/length', True))
+                temp_block_number = yaml.safe_load(sender.call('chain/length', True))
 
         print('Waiting for nodes to receive transactions')
-        while not check_block_txts(
-                ts_dir_path,
-                host_number,
-                number_of_transactions):
+        while not check_block_txts(ts_dir_path,
+                                   host_number,
+                                   number_of_transactions):
             sleep(0.5)
 
         elapsed_time = time() - start_time
@@ -196,20 +182,16 @@ def register_peer_topology(net):
 def main():
     host_type = None
     parser = ArgumentParser()
-    parser.add_argument(
-        '-p',
-        '--path',
-        default='/tmp/',
-        type=str,
-        help='where the logs will be located. default: /tmp/')
+    help_message = 'where the logs will be located. default: /tmp/'
+    parser.add_argument('-p', '--path', default='/tmp/', 
+                        type=str, help=help_message)
     args = parser.parse_args()
     tmp_location = '/tmp/bcn'
     if os.path.exists(tmp_location):
         shutil.rmtree('/tmp/bcn')
     setLogLevel('info')
     host_number = int(input("Number of hosts(>10):"))
-    number_of_transactions = int(
-        input("Number of repeated random transactions:"))
+    number_of_transactions = int(input("Number of repeated random transactions:"))
     simulate(host_number, number_of_transactions, args.path)
 
 
