@@ -16,13 +16,9 @@ import getopt
 def simulate(host_type):
     net = None
     try:
-        net = Mininet(
-            topo=None,
-            build=False,
-            host=host_type,
-            ipBase='10.0.0.0/8',
-            xterms=True,
-            waitConnected=True)
+        net = Mininet(topo=None, build=False, 
+                      host=host_type, ipBase='10.0.0.0/8', 
+                      xterms=True, waitConnected=True)
 
         h1 = net.addHost('h1', ip='10.0.0.1', defaultRoute=None)
         h2 = net.addHost('h2', ip='10.0.0.2', defaultRoute=None)
@@ -61,16 +57,9 @@ def simulate(host_type):
                 if h.name in generated:
                     continue
                 host_amount = verifier_check_amount(h, verifier)
-                print(
-                    h.name +
-                    ' has ' +
-                    str(host_amount) +
-                    ' coin currently, target is: ' +
-                    str(a))
+                print(h.name + ' has ' + str(host_amount) + ' coin currently, target is: ' + str(a))
                 if (host_amount >= a):
-                    print(
-                        h.name +
-                        ' has enough coin, stopping generation for it')
+                    print(h.name + ' has enough coin, stopping generation for it')
                     h.call('block/generate/loop/stop')
                     generated.append(h.name)
 
@@ -104,8 +93,7 @@ def simulate(host_type):
         wait_and_forge_transactions(verifier, 3)
 
         # 8/11/10 between entity
-        raw_input(
-            'Input something to send mid-transactions(between entity) in 8/11/10')
+        raw_input('Input something to send mid-transactions(between entity) in 8/11/10')
         send_transaction(h6, h5, 5)
         send_transaction(h7, h5, 30)
         wait_and_forge_transactions(verifier, 2)
@@ -147,12 +135,7 @@ def simulate(host_type):
         print("Sending " + str(transaction_count) +
               " number of transactions from h11 to h12")
         for i in range(1, transaction_count + 1):
-            send_transaction(
-                h11,
-                h12,
-                target_amount /
-                float(transaction_count),
-                True)
+            send_transaction(h11, h12, target_amount/float(transaction_count), True)
             wait_and_forge_transactions(verifier, 1)
             sleep(0.5)
 
