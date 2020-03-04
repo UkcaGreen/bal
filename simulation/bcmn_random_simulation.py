@@ -130,8 +130,7 @@ def subsimulation(net_params, miner_names,
             if send_and_log_transaction(sender, receiver, 1, ts_dir_path):
                 i = i + 1
                 sleep(1)
-                temp_block_number = yaml.safe_load(
-                    sender.call('chain/length', True))
+                temp_block_number = yaml.safe_load(sender.call('chain/length', True))
 
         print('Waiting for nodes to receive transactions')
         host_number = len(net.hosts)
@@ -204,8 +203,7 @@ def main():
         host_number = int(input("Number of hosts(>10):"))
         max_bw = int(input("Maximum bandwith percentage (0-100):"))
         miner_percentage = int(input("Miner percentage (0-100):"))
-        transaction_count = int(
-            input("Number of repeated random transactions:"))
+        transaction_count = int(input("Number of repeated random transactions:"))
         simulation_count = int(input("Number of repeated simulations:"))
         simulate(host_type, host_number, 
                  max_bw, [miner_percentage], 
