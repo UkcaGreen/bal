@@ -78,33 +78,32 @@ class UploadCommand(Command):
         sys.exit()
 
 
-setup(
-    name=NAME,
-    version=about['__version__'],
-    description=DESCRIPTION,
-    long_description=long_description,
-    author=AUTHOR,
-    author_email=EMAIL,
-    python_requires=REQUIRES_PYTHON,
-    url=URL,
-    packages=find_packages(exclude=('tests',)),
-    install_requires=REQUIRED,
-    include_package_data=True,
-    license='GPL',
-    classifiers=[
-        # Trove classifiers
-        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'License :: OSI Approved :: GNU General Public License v3',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy'
-    ],
-    # $ setup.py publish support.
-    cmdclass={
-        'upload': UploadCommand,
-    },
+setup(name=NAME,
+      version=about['__version__'],
+      description=DESCRIPTION,
+      long_description=long_description,
+      author=AUTHOR,
+      author_email=EMAIL,
+      python_requires=REQUIRES_PYTHON,
+      url=URL,
+      packages=find_packages(exclude=('tests',)),
+      install_requires=REQUIRED,
+      include_package_data=True,
+      license='GPL',
+      classifiers=[
+          # Trove classifiers
+          # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+          'License :: OSI Approved :: GNU General Public License v3',
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: Implementation :: CPython',
+          'Programming Language :: Python :: Implementation :: PyPy'
+      ],
+      # $ setup.py publish support.
+      cmdclass={
+          'upload': UploadCommand,
+      },
 )
