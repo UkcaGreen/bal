@@ -85,11 +85,10 @@ class BCNode(CPULimitedHost):
             method = "GET"
 
         if self.cargs:
-            a = self.cargs.format(command=command, method=method, 
-                                  name=self.name, IP=self.IP(), 
-                                  port=self.port, cdir=self.cdir,
-                                  sdir=self.sdir)
-            cmd += " " + 
+            cmd += " " + self.cargs.format(command=command, method=method, 
+                                           name=self.name, IP=self.IP(), 
+                                           port=self.port, cdir=self.cdir,
+                                           sdir=self.sdir)
         else:
             cmd += " " + command
         if silent:
