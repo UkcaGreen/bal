@@ -60,8 +60,7 @@ def validate_transaction(transaction, a_unspent_tx_outs):
         print('some of the tx_ins are invalid in tx: ' + transaction['id'])
         return False
 
-    if total_tx_out_values(transaction) != total_tx_in_values(
-            transaction, a_unspent_tx_outs):
+    if total_tx_out_values(transaction) != total_tx_in_values(transaction, a_unspent_tx_outs):
         print('total_tx_out_values !== total_tx_in_values in tx: ' + transaction['id'])
         return False
 
