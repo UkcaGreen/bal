@@ -91,8 +91,9 @@ def subsimulation(adj_matrix, host_number,
 
         target_amount = 10
         target_number = 3
-        random_generator_number = target_number - \
-            len(miners) if target_number > len(miners) else 0
+        random_generator_number = (target_number - len(miners) 
+                                   if target_number > len(miners) 
+                                   else 0)
         random_generator_hosts = random.sample([x for x in net.hosts if x not in miners], 
                                                random_generator_number)
         generators = miners + random_generator_hosts
@@ -181,8 +182,7 @@ def main():
         shutil.rmtree('/tmp/bcn')
     setLogLevel('info')
     host_number = int(input("Number of hosts(>10):"))
-    number_of_transactions = int(
-        input("Number of repeated random transactions:"))
+    number_of_transactions = int(input("Number of repeated random transactions:"))
     simulate(host_number, number_of_transactions, args.path)
 
 
