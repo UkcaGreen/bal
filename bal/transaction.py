@@ -80,8 +80,7 @@ def validate_block_transactions(a_transactions, a_unspent_tx_outs, block_index):
         return False
 
     normal_transactions = a_transactions[1:]
-    return all(validate_transaction(tx, a_unspent_tx_outs)
-               for tx in normal_transactions)
+    return all(validate_transaction(tx, a_unspent_tx_outs) for tx in normal_transactions)
 
 
 def validate_coinbase_tx(transaction, block_index):
@@ -113,8 +112,9 @@ def validate_coinbase_tx(transaction, block_index):
 
 
 def validate_tx_in(tx_in, transaction, a_unspent_tx_outs):
-    referenced_u_tx_out = find_unspent_tx_out(
-        tx_in['tx_out_id'], tx_in['tx_out_index'], a_unspent_tx_outs)
+    referenced_u_tx_out = find_unspent_tx_out(tx_in['tx_out_id'],
+                                              tx_in['tx_out_index'], 
+                                              a_unspent_tx_outs)
 
     if not referenced_u_tx_out:
         print('referenced txOut not found: ' + json.dumps(tx_in))
@@ -149,8 +149,9 @@ def has_duplicates(tx_ins):
 def sign_tx_in(transaction, tx_in_index, private_key, unspent_tx_outs):
     tx_in = transaction['tx_ins'][tx_in_index]
     tx_to_sign = transaction['id']
-    referenced_unspent_tx_out = find_unspent_tx_out(
-        tx_in['tx_out_id'], tx_in['tx_out_index'], unspent_tx_outs)
+    referenced_unspent_tx_out = find_unspent_tx_out(tx_in['tx_out_id'],
+                                                    tx_in['tx_out_index'],
+                                                    unspent_tx_outs)
     if not referenced_unspent_tx_out:
         exception_message = 'could not find referenced txOut'
         raise Exception(exception_message)
@@ -229,16 +230,14 @@ def is_valid_transaction_structure(transaction):
         print('invalid txIns type in transaction')
         return False
 
-    if not all(is_valid_tx_in_structure(tx_in)
-               for tx_in in transaction['tx_ins']):
+    if not all(is_valid_tx_in_structure(tx_in) for tx_in in transaction['tx_ins']):
         return False
 
     if not isinstance(transaction['tx_outs'], list):
         print('invalid txIns type in transaction')
         return False
 
-    if not all(is_valid_tx_out_structure(tx_out)
-               for tx_out in transaction['tx_outs']):
+    if not all(is_valid_tx_out_structure(tx_out) for tx_out in transaction['tx_outs']):
         return False
 
     return True
@@ -268,7 +267,8 @@ def get_new_unspent_tx_outs(new_transactions):
 
 def get_consumed_tx_outs(new_transactions):
     return (seq(new_transactions)
-            .map(lambda t: t['tx_ins']).reduce(lambda a, b: a +b, [])
+            .map(lambda t: t['tx_ins'])
+            .reduce(lambda a, b: a +b, [])
             .map(lambda tx_in: new_unspent_tx_out(tx_in['tx_out_id'], tx_in['tx_out_index'], '', 0)))
 
 
