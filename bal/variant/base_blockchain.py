@@ -108,11 +108,8 @@ class BaseBlockchain(object):
         previous_block = self.get_latest_block()
         difficulty = self.get_difficulty(self.get_blockchain())
         next_index = previous_block['index'] + 1
-        new_block = self.find_block(
-            next_index,
-            previous_block['hash'],
-            transactions,
-            difficulty)
+        new_block = self.find_block(next_index,previous_block['hash'],
+                                    transactions,difficulty)
         if self.add_block_to_chain(new_block):
             self.after_generate_raw_next_block(new_block)
             self.p2p.broadcast_latest()
@@ -303,8 +300,7 @@ class BaseBlockchain(object):
         db = shelve.open(self.db)
         try:
             if db['chain']:
-                self.chain = yaml.safe_load(
-                    json.dumps(json.loads(db['chain'])))
+                self.chain = yaml.safe_load(json.dumps(json.loads(db['chain'])))
 
         except BaseException:
             db.close()
