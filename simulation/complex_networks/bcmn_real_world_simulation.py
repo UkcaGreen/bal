@@ -89,8 +89,7 @@ def subsimulation(adj_matrix, host_number,
 
         target_amount = 10
         target_number = 3
-        random_generator_number = target_number - \
-            len(miners) if target_number > len(miners) else 0
+        random_generator_number = target_number - len(miners) if target_number > len(miners) else 0
         random_generator_hosts = random.sample([x for x in net.hosts if x not in miners], 
                                                random_generator_number)
         generators = miners + random_generator_hosts
@@ -107,12 +106,8 @@ def subsimulation(adj_matrix, host_number,
                 if h.name in generated:
                     continue
                 host_amount = verifier_check_amount(h, verifier)
-                print(
-                    h.name +
-                    ' has ' +
-                    str(host_amount) +
-                    ' coins currently, target is: ' +
-                    str(target_amount))
+                print(h.name + ' has ' + str(host_amount) + ' coins currently, ' +
+                      'target is: ' + str(target_amount))
                 if (host_amount >= target_amount):
                     print(h.name + ' has enough coins, stopping generation for it')
                     h.call('block/generate/loop/stop', True)
