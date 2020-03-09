@@ -33,8 +33,7 @@ def get_switch_map(net):
             host_name = to_intf.node.name
             bandwith = to_intf.params.get('bw', 100)
 
-            temp_val = max(
-                [vals for vals in switch_map[switch_name]['hosts'].values()] or [0])
+            temp_val = max([vals for vals in switch_map[switch_name]['hosts'].values()] or [0])
             if temp_val < bandwith:
                 max_bw_map[switch_name] = [host_name]
 
@@ -148,8 +147,7 @@ def move_txs_to_directories_helper(dir_path, file_prefix):
 
 def send_transaction(from_host, to_host, amount, silent=False):
     to_host_addr = yaml.safe_load(to_host.call('address/my', True))['address']
-    transaction_param = '{"recipient": "%s", "amount": %f}' % (
-        to_host_addr, amount)
+    transaction_param = '{"recipient": "%s", "amount": %f}' % (to_host_addr, amount)
     from_host.call('transactions/send', silent, transaction_param)
 
 
