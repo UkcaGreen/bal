@@ -120,7 +120,8 @@ class P2P:
                 self.query(message.reply_addr, query_message)
                 print('Chain far behind {}, requesting entire chain'.format(message.reply_addr[1]))
             elif self.blockchain().replace_chain(received_chain):
-                print('Received updated chain from {}'.format(message.reply_addr[1]))self.broadcast_latest()
+                print('Received updated chain from {}'.format(message.reply_addr[1]))
+                self.broadcast_latest()
         else:
             print('Received chain from {} not longer than current chain'.format(message.reply_addr[1]))
 

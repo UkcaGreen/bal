@@ -62,15 +62,14 @@ def subsimulation(adj_matrix, host_number,
     net = None
     try:
         start_time = time()
-        net_params = {
-            'topo': None,
-            'build': False,
-            'host': POWNode,
-            'switch': OVSBridge,
-            'link': TCLink,
-            'ipBase': '10.0.0.0/8',
-            'waitConnected': True,
-            'xterms': False}
+        net_params = {'topo': None,
+                      'build': False,
+                      'host': POWNode,
+                      'switch': OVSBridge,
+                      'link': TCLink,
+                      'ipBase': '10.0.0.0/8',
+                      'waitConnected': True,
+                      'xterms': False}
         net = rtg.mininet_topo(adj_matrix, net_params)
         net.build()
         net.start()

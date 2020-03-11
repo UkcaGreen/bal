@@ -66,8 +66,8 @@ def find_tx_outs_for_amount(amount, my_unspent_tx_outs):
             left_over_amount = current_amount - amount
             return [included_unspent_tx_outs, left_over_amount]
 
-    exception_message = 'Cannot create transaction from the available unspent transaction outputs.' + \
-        ' Required amount:' + str(amount) + '. Available unspentTxOuts:' + json.dumps(my_unspent_tx_outs)
+    exception_message = ('Cannot create transaction from the available unspent transaction outputs.' + 
+        ' Required amount:' + str(amount) + '. Available unspentTxOuts:' + json.dumps(my_unspent_tx_outs))
     raise Exception(exception_message)
 
 

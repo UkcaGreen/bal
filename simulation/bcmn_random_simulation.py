@@ -34,15 +34,14 @@ def simulate(host_type, host_number,
     edge_number = switch_number
 
     topo = rtg.mininet_topo(switch_number, edge_number, host_number, max_bw)
-    net_params = {
-        'topo': topo,
-        'build': False,
-        'host': host_type,
-        'switch': OVSBridge,
-        'link': TCLink,
-        'ipBase': '10.0.0.0/8',
-        'waitConnected': True,
-        'xterms': debug_mode}
+    net_params = {'topo': topo,
+                  'build': False,
+                  'host': host_type,
+                  'switch': OVSBridge,
+                  'link': TCLink,
+                  'ipBase': '10.0.0.0/8',
+                  'waitConnected': True,
+                  'xterms': debug_mode}
 
     for miner_percentage, transaction_count \
         in itertools.product(miner_percentages, transaction_counts):
